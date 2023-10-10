@@ -1,33 +1,52 @@
 from flask import Flask, request, jsonify, abort
+from flask_restx import Api, Resource, fields
 from recommend.recommend import get_query_sim_top_k
 
 def create_app():
     app = Flask(__name__)
 
-    # 챗봇 엔진 query 전송 API
-    @app.route('/query', methods=['POST'])
-    def query():
-        try:
-            # 클라이언트가 전송한 데이터를 받음
-            body = request.get_json()
-            query = body['query']
+    # Initialize the flask-restx API
+    api = Api(app, version='1.0', title='Product Recommender API',
+              description='API for recommending products')
+    
+    # Define a namespace for your API
+    ns = api.namespace('', description='Product recommendation operations')
 
-            top_k = 3 # 상위 n개의 유사한 상품을 추천
+    # Define a model for the response
+    result_model = api.model('RecommendationResult', {
+        'query': fields.String(description='The query for product recommendation'),
+        'results': fields.List(fields.String, description='List of recommended products')
+    })
 
-            # 상품 추천 모듈
-            results = get_query_sim_top_k(query, top_k)
-            print(results)
+    # Create a class-based resource for the recommendation endpoint
+    @ns.route('/query')
+    class QueryResource(Resource):
+        @api.expect(api.model('Query', {
+            'query': fields.String(description='The query for product recommendation')
+        }))
+        @api.response(200, 'Success', result_model)
+        def post(self):
+            try:
+                # Get the query from the request
+                query = api.payload['query']
 
-            # 상품 추천 결과를 클라이언트에게 전송
-            response = {
-                'query': query,
-                'results': results
-            }
+                top_k = 3  # Top k recommendations
 
-            return jsonify(response)
-        except Exception as ex:
-            print(f"오류 발생: {ex}")
-            # 오류 발생 시 500 Error
-            abort(500)
-        
+                # Product recommendation module
+                results = get_query_sim_top_k(query, top_k)
+                print(results)
+
+                # Create the response
+                response = {
+                    'query': query,
+                    'results': results
+                }
+
+                return jsonify(response)
+
+            except Exception as ex:
+                print(f"Error: {ex}")
+                # Return a 500 Internal Server Error in case of an exception
+                abort(500)
+
     return app
