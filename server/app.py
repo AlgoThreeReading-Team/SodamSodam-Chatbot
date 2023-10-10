@@ -1,28 +1,33 @@
-from flask import Flask, request, jsonify, abort, render_template
-import socket
-import json
+from flask import Flask, request, jsonify, abort
+from recommend.recommend import get_query_sim_top_k
 
-# 챗봇 엔진 서버 정보
-host = "127.0.0.1"      # 챗봇 엔진 서버 IP
-port = 5050             # 챗봇 엔진 port
+def create_app():
+    app = Flask(__name__)
 
-# Flask 애플리케이션
-app = Flask(__name__)
+    # 챗봇 엔진 query 전송 API
+    @app.route('/query', methods=['POST'])
+    def query():
+        try:
+            # 클라이언트가 전송한 데이터를 받음
+            body = request.get_json()
+            query = body['query']
 
-# 챗봇 엔진 query 전송 API
-@app.route('/query', methods=['POST'])
-def query():
-    body = request.get_json()
-    try:
-        # 일반 질의응답 API
-        ret = {
-            'Query' : 'test',
-        }
-        return jsonify(ret)
+            top_k = 3 # 상위 n개의 유사한 상품을 추천
 
-    except Exception as ex:
-        # 오류 발생 시 500 Error
-        abort(500)
+            # 상품 추천 모듈
+            results = get_query_sim_top_k(query, top_k)
+            print(results)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+            # 상품 추천 결과를 클라이언트에게 전송
+            response = {
+                'query': query,
+                'results': results
+            }
+
+            return jsonify(response)
+        except Exception as ex:
+            print(f"오류 발생: {ex}")
+            # 오류 발생 시 500 Error
+            abort(500)
+        
+    return app
