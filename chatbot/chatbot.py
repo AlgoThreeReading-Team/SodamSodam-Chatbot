@@ -6,9 +6,12 @@ import numpy as np
 from sentence_transformers import SentenceTransformer, util
 import torch
 
-# openai.api_key =
+
+openai.api_key ="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"
+conversation_history = []
+
 def chatbot(prompt, model="gpt-3.5-turbo"):
-    messages = [{"role": "user", "content": prompt}]
+    messages = conversation_history + [{"role": "user", "content": prompt}]
     response = openai.ChatCompletion.create(
         model=model,
         messages=messages,
@@ -51,11 +54,15 @@ while (word != "stop"):
     """
     response = chatbot(prompt)
     print(response)
+    conversation_history.append({"role": "user", "content": word})
+    conversation_history.append({"role": "assistant", "content": response})
+
     response_json = json.loads(response)
     if response_json["user_intent"] == "추천":
         formatted_keywords = " ".join(keyword["keyword"] for keyword in response_json["keywords"])
 
         recommendataion(formatted_keywords)
+
 
 
 
