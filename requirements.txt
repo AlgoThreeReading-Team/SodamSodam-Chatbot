@@ -2,3 +2,4 @@ flask
 sentence_transformers
 torch
 python-dotenv
+flask-cors

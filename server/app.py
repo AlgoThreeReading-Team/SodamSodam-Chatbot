@@ -2,9 +2,12 @@ from flask import Flask, request, jsonify, abort
 from flask_restx import Api, Resource, fields
 from recommend.recommend import get_query_sim_top_k
 from chatbot.chatbot import get_user_intent, get_recommendation_answer
+from flask_cors import CORS
 
 def create_app():
     app = Flask(__name__)
+    # cors 허용
+    cors = CORS(app, resources={r"/query*": {"origins": "*"}})
 
     # Initialize the flask-restx API
     api = Api(app, version='1.0', title='Product Recommender API',
