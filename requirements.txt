@@ -1,3 +1,4 @@
 flask
 sentence_transformers
 torch
+python-dotenv
