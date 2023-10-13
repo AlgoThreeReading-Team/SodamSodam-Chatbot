@@ -11,7 +11,7 @@ print(openai.api_key)
 
 # 사용자의 의도를 파악하는 모델
 def get_user_intent(query):
-  allowed_intents = ['설명', '추천', '장바구니 담기', '결제']
+  allowed_intents = ['설명', '추천', '결제']
   messages = [
       {"role": "system", "content": "You are a helpful assistant who understands the intent of the user's question."},
       {"role": "user", "content": f"Which category does the sentence below belong to: {' | '.join(allowed_intents)}? Be sure to answer with only one token. \n{query} \nA:"}

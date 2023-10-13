@@ -26,7 +26,8 @@ def create_app():
     @ns.route('/query')
     class QueryResource(Resource):
         @api.expect(api.model('Query', {
-            'query': fields.String(description='The query for product recommendation')
+            'query': fields.String(description='The query for product recommendation'),
+            'product_info': fields.String(description='The product information')
         }))
         @api.response(200, 'Success', result_model)
         def post(self):
@@ -39,18 +40,14 @@ def create_app():
 
                 top_k = 1  # Top k recommendations
 
-                # Product recommendation module
-                product_info = get_query_sim_top_k(query, top_k)
-
-                if intent == '추천':
-                    answer = get_recommendation_answer(product_info)
+                if intent == '결제':
+                    answer = ""
+                elif intent == '추천':
+                    product_info = get_query_sim_top_k(query, top_k)
+                    answer = product_info
                 elif intent == '설명':
                     answer = ""
-                elif intent == "장바구니 담기":
-                    # TODO: 장바구니 모듈
-                    answer = ""
-                elif intent == "결제":
-                    # TODO: 결제 모듈
+                elif intent == '추가 검색':
                     answer = ""
 
                 # Create the response
