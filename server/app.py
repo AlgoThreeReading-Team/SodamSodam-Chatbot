@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify, abort
 from flask_restx import Api, Resource, fields
-from recommend.recommend import get_query_sim_top_k
-from chatbot.chatbot import get_user_intent, get_recommendation_answer
+from recommend.recommend import get_query_sim_top_k, get_product_info_by_id
+from chatbot.chatbot import get_user_intent, get_recommendation_answer, get_description_answer
 from flask_cors import CORS
+import json
 
 def create_app():
     app = Flask(__name__)
@@ -27,7 +28,7 @@ def create_app():
     class QueryResource(Resource):
         @api.expect(api.model('Query', {
             'query': fields.String(description='The query for product recommendation'),
-            'product_info': fields.String(description='The product information')
+            'product_id': fields.String(description='The product information')
         }))
         @api.response(200, 'Success', result_model)
         def post(self):
@@ -42,11 +43,24 @@ def create_app():
 
                 if intent == '결제':
                     answer = ""
+
                 elif intent == '추천':
-                    product_info = get_query_sim_top_k(query, top_k)
-                    answer = product_info
+                    product_info = get_query_sim_top_k(query, top_k)[0]
+                    answer = get_recommendation_answer(product_info)
+
                 elif intent == '설명':
-                    answer = ""
+                    product_id = api.payload['product_id']
+                    if product_id:
+                        product_info = get_product_info_by_id(product_id)
+                        if product_info:
+                            query = api.payload.get('query', '')  # API 페이로드에서 'query' 값 가져오고 없을 경우 빈 문자열로 초기화
+                            answer = get_description_answer(product_info, query)
+                        else:
+                            answer = "해당 상품은 없습니다."
+                        answer = get_description_answer(product_info, query)
+                    else:
+                        answer = "상품 ID를 입력해주세요."
+
                 elif intent == '추가 검색':
                     answer = ""
 
@@ -55,6 +69,7 @@ def create_app():
                     'query': query,
                     'intent': intent,
                     'answer': answer,
+                    'product_id': str(product_info['id']) if intent == '추천' else None
                 }
 
                 return jsonify(response)

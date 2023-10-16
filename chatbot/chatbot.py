@@ -27,10 +27,14 @@ def get_user_intent(query):
 
 # TODO: 상품 추천 멘트
 def get_recommendation_answer(product_info):
+  return f"다음 상품은 어떠세요? 해당 상품은 {product_info['title']} 이며, 가격은 {product_info['total_price']} 이며, 평점은 {product_info['avg_star']}, 평점 개수는 {product_info['count_star']} 입니다. 배송료는 {product_info['shipping_fee']} 입니다."
+
+# TODO: 상품 설명 멘트
+def get_description_answer(product_info, query):
   messages = [
-      {"role": "system", "content": "당신은 이제부터 시각장애인들에게 상품에 대한 정보를 제공해주는 점원입니다."},
-      {"role": "assistant", "content": "다음 상품의 상품명, 가격, 평점을 두 줄이내로 딱딱 끊어서 말하지 말고 친절하게 설명해줘. 그 외에 정보들은 답변하지마."},
-      {"role": "user", "content": f"{product_info}"}
+    {"role": "system", "content": "당신은 사용자에게 상품에 대해서 설명해주는 점원입니다."},
+    {"role": "assistant", "content": f"{product_info}"},
+    {"role": "user", "content": f"{query}"}
   ]
 
   response = openai.ChatCompletion.create(
@@ -38,6 +42,5 @@ def get_recommendation_answer(product_info):
         messages=messages,
     )
   chatbot_response = response['choices'][0]['message']['content']
-  return chatbot_response
 
-# TODO: 상품 설명 멘트
+  return chatbot_response
