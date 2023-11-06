@@ -65,18 +65,25 @@ def create_app():
 
                 if intent == "결제":
                     try:
+                        product_ids = [
+                            "https://www.coupang.com/vp/products/5225707661?itemId=7344236763&vendorItemId=74635450600&pickType=COU_PICK&q=%EC%B2%AD%EC%86%8C%EA%B8%B0&itemsCount=36&searchId=743b0544633d41e8aa749498e69d26f4&rank=1&isAddedCart=",
+                            "https://www.coupang.com/vp/products/1201668048?itemId=2186769902&vendorItemId=&isAddedCart=",
+                        ]
                         selenium_service = SeleniumService()
                         selenium_service.initialize()
                         selenium_service.login("", "")
+                        for product_id in product_ids:
+                            selenium_service.goToProduct(product_id)
                         selenium_service.goToCart()
                         selenium_service.selectAllItemsInCart()
                         selenium_service.clickBuyButton()
                         selenium_service.clickPayButton()
-                        selenium_service.driver.close()
-                        answer = "결제가 완료되었습니다."
+                        answer = "장동호님 결제가 완료되었습니다."
                     except Exception as ex:
                         print(f"Error: {ex}")
-                        answer = "결제에 실패하였습니다."
+                        answer = "장동호님 결제에 실패하였습니다."
+                    finally:
+                        selenium_service.driver.close()
 
                 elif intent == "추천":
                     product_info = get_query_sim_top_k(query, top_k)[0]
@@ -94,8 +101,8 @@ def create_app():
                     else:
                         answer = "상품 ID를 입력해주세요."
 
-                elif intent == "추가 검색":
-                    answer = ""
+                elif intent == "장바구니":
+                    answer = "장동호님 장바구니에 담았습니다."
 
                 # Create the response
                 response = {

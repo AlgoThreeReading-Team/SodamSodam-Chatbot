@@ -11,7 +11,7 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # 사용자의 의도를 파악하는 모델
 def get_user_intent(query):
-    allowed_intents = ["설명", "추천", "결제"]
+    allowed_intents = ["설명", "추천", "장바구니", "결제"]
     messages = [
         {
             "role": "system",
@@ -34,7 +34,7 @@ def get_user_intent(query):
 
 # TODO: 상품 추천 멘트
 def get_recommendation_answer(product_info):
-    return f"다음 상품은 어떠세요? 해당 상품은 {product_info['title']} 이며, 가격은 {product_info['total_price']} 이며, 평점은 {product_info['avg_star']}, 평점 개수는 {product_info['count_star']} 입니다. 배송료는 {product_info['shipping_fee']} 입니다."
+    return f"다음 상품은 어떠세요? 해당 상품은 {product_info['title']} 이며, 가격은 {product_info['total_price']}원 이며, 평점은 {product_info['avg_star']}, 평점 개수는 {product_info['count_star']}개 입니다. 배송료는 {product_info['shipping_fee']}원 입니다."
 
 
 # TODO: 상품 설명 멘트
