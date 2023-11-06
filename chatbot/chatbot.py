@@ -39,6 +39,7 @@ def get_recommendation_answer(product_info):
 
 # TODO: 상품 설명 멘트
 def get_description_answer(product_info, query):
+    print(product_info, query)
     messages = [
         {"role": "system", "content": "당신은 사용자에게 상품에 대해서 설명해주는 점원입니다."},
         {"role": "assistant", "content": f"{product_info}"},

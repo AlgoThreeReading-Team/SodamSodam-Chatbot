@@ -87,9 +87,6 @@ def create_app():
                     if product_id:
                         product_info = get_product_info_by_id(product_id)
                         if product_info:
-                            query = api.payload.get(
-                                "query", ""
-                            )  # API 페이로드에서 'query' 값 가져오고 없을 경우 빈 문자열로 초기화
                             answer = get_description_answer(product_info, query)
                         else:
                             answer = "해당 상품은 없습니다."
