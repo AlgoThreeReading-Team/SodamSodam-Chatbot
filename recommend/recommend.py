@@ -31,6 +31,14 @@ def get_product_info_by_id(index):
     return product_info
 
 
+def get_product_reviews_by_id(index):
+    index = int(index)
+    product_info = {
+        "review": df.iloc[index]["review"],
+    }
+    return product_info
+
+
 def get_query_sim_top_k(query, top_k):
     # 쿼리를 임베딩
     query_encode = model.encode(query)
@@ -48,7 +56,6 @@ def get_query_sim_top_k(query, top_k):
             "title": df.iloc[index]["title"],
             "product_url": df.iloc[index]["product_url"],
             "avg_star": df.iloc[index]["avg_star"],
-            "cosine_similarity": cos_scores[index].item(),
             "count_star": df.iloc[index]["count_star"],
             "total_price": df.iloc[index]["total_price"],
             "shipping_fee": df.iloc[index]["shipping_fee"]

@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify, abort
 from flask_restx import Api, Resource, fields
-from recommend.recommend import get_query_sim_top_k, get_product_info_by_id
+from recommend.recommend import (
+    get_query_sim_top_k,
+    get_product_info_by_id,
+    get_product_reviews_by_id,
+)
 from chatbot.chatbot import (
     get_user_intent,
     get_recommendation_answer,
@@ -97,9 +101,26 @@ def create_app():
                             answer = get_description_answer(product_info, query)
                         else:
                             answer = "해당 상품은 없습니다."
-                        answer = get_description_answer(product_info, query)
                     else:
-                        answer = "상품 ID를 입력해주세요."
+                        answer = "어떤 상품을 원하세요?"
+
+                elif intent == "리뷰":
+                    product_id = api.payload["product_id"]
+                    if product_id:
+                        product_info = get_product_reviews_by_id(product_id)
+                        if product_info:
+                            # 3000자 이상 리뷰는 3000자로 자르기
+                            product_info["review"] = (
+                                product_info["review"][:3000] + "..."
+                                if len(product_info["review"]) > 3000
+                                else product_info["review"]
+                            )
+                            print(product_info["review"])
+                            answer = get_description_answer(product_info, query)
+                        else:
+                            answer = "해당 상품은 없습니다."
+                    else:
+                        answer = "어떤 상품을 원하세요?"
 
                 elif intent == "장바구니":
                     answer = "장동호님 장바구니에 담았습니다."

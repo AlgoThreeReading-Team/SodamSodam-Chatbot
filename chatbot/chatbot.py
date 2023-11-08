@@ -11,7 +11,7 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 # 사용자의 의도를 파악하는 모델
 def get_user_intent(query):
-    allowed_intents = ["설명", "추천", "장바구니", "결제"]
+    allowed_intents = ["설명", "추천", "리뷰", "장바구니", "결제"]
     messages = [
         {
             "role": "system",
@@ -39,16 +39,21 @@ def get_recommendation_answer(product_info):
 
 # TODO: 상품 설명 멘트
 def get_description_answer(product_info, query):
-    print(product_info, query)
     messages = [
-        {"role": "system", "content": "당신은 사용자에게 상품에 대해서 설명해주는 점원입니다."},
-        {"role": "assistant", "content": f"{product_info}"},
-        {"role": "user", "content": f"{query}"},
+        {
+            "role": "system",
+            "content": "당신은 사용자에게 상품에 대해서 설명해주는 점원입니다. 손님은 항상 바쁘기 때문에 답변을 간결하게 하려고 노력해주세요.",
+        },
+        {
+            "role": "user",
+            "content": f"질문: {query}\n상품 정보: {product_info}\n이 상품에 대해서 설명해주는 멘트만 짧게 작성해주세요. \nA:",
+        },
     ]
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=messages,
+        temperature=0.5,
     )
     chatbot_response = response["choices"][0]["message"]["content"]
 

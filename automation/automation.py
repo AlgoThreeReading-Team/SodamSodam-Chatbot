@@ -23,6 +23,7 @@ class SeleniumService:
     # 로그인
     def login(self, username, password):
         self.driver.get("https://www.coupang.com/")
+        time.sleep(1)
         self.driver.find_element(By.XPATH, '//*[@id="login"]/a').click()
         self.driver.find_element(By.XPATH, '//*[@id="login-email-input"]').send_keys(
             username
@@ -33,7 +34,7 @@ class SeleniumService:
         self.driver.find_element(
             By.XPATH, "/html/body/div[1]/div[1]/div[2]/div[1]/form/div[5]/button"
         ).click()
-        time.sleep(2)
+        time.sleep(1)
 
     # 상품 이동
     def goToProduct(self, product_url):
@@ -43,7 +44,7 @@ class SeleniumService:
             "/html/body/div[2]/section/div/div[1]/div[3]/div[17]/div[2]/div[2]/button[1]",
         )[0]
         cart_button.click()
-        time.sleep(2)
+        time.sleep(1)
 
     # 장바구니 이동
     def goToCart(self):
@@ -51,7 +52,7 @@ class SeleniumService:
             By.XPATH, '//*[@id="header"]/section/div[1]/ul/li[2]/a'
         )[0]
         cart_button.click()
-        time.sleep(2)
+        time.sleep(1)
 
     # 장바구니에 있는 모든 상품 선택
     def selectAllItemsInCart(self):
@@ -71,7 +72,7 @@ class SeleniumService:
         buy_button = self.driver.find_elements(By.XPATH, '//*[@id="btnPay"]')[0]
         print(buy_button)
         buy_button.click()
-        time.sleep(2)
+        time.sleep(1)
 
     # 결제하기 버튼 클릭
     def clickPayButton(self):
@@ -79,4 +80,4 @@ class SeleniumService:
             By.XPATH, '//*[@id="paymentBtn"]/img'
         )[0]
         payment_button.click()
-        time.sleep(2)
+        time.sleep(1)
