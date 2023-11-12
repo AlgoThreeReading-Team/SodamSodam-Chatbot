@@ -1,13 +1,10 @@
-import openai
+from openai import OpenAI
 import requests
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# OpenAI API Key
-openai.api_key = os.environ.get("OPENAI_API_KEY")
-
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 # 사용자의 의도를 파악하는 모델
 def get_user_intent(query):
@@ -23,11 +20,9 @@ def get_user_intent(query):
         },
     ]
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-    )
-    chatbot_response = response["choices"][0]["message"]["content"]
+    response = client.chat.completions.create(model="gpt-3.5-turbo",
+    messages=messages)
+    chatbot_response = response.choices[0].message.content
 
     return chatbot_response if chatbot_response in allowed_intents else "미분류"
 
@@ -50,11 +45,9 @@ def get_description_answer(product_info, query):
         },
     ]
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=messages,
-        temperature=0.5,
-    )
-    chatbot_response = response["choices"][0]["message"]["content"]
+    response = client.chat.completions.create(model="gpt-3.5-turbo",
+    messages=messages,
+    temperature=0.5)
+    chatbot_response = response.choices[0].message.content
 
     return chatbot_response
