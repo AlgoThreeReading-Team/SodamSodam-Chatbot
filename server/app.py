@@ -9,6 +9,12 @@ from chatbot.chatbot import (
     get_user_intent,
     get_recommendation_answer,
     get_description_answer,
+    get_cart_intent,
+)
+from cart.cart import (
+    plus_cart_item,
+    get_all_cart_items,
+    delete_cart_item,
 )
 from flask_cors import CORS
 import json
@@ -66,18 +72,18 @@ def create_app():
 
                 top_k = 1  # Top k recommendations
 
-                if intent == "결제":
+                if intent == "payment":
                     try:
                         answer = "장동호님 결제가 완료되었습니다."
                     except Exception as ex:
                         print(f"Error: {ex}")
                         answer = "장동호님 결제에 실패하였습니다."
 
-                elif intent == "추천":
+                elif intent == "recommendation":
                     product_info = get_query_sim_top_k(query, top_k)[0]
                     answer = get_recommendation_answer(product_info)
 
-                elif intent == "설명":
+                elif intent == "description":
                     product_id = api.payload["product_id"]
                     if product_id:
                         product_info = get_product_info_by_id(product_id)
@@ -88,7 +94,7 @@ def create_app():
                     else:
                         answer = "어떤 상품을 원하세요?"
 
-                elif intent == "리뷰":
+                elif intent == "review":
                     product_id = api.payload["product_id"]
                     if product_id:
                         product_info = get_product_reviews_by_id(product_id)
@@ -106,15 +112,27 @@ def create_app():
                     else:
                         answer = "어떤 상품을 원하세요?"
 
-                elif intent == "장바구니":
-                    answer = "장동호님 장바구니에 담았습니다."
+                elif intent == "cart":
+                    cart_intent = get_cart_intent(query)
+                    if cart_intent == "show":
+                        answer = get_all_cart_items()
+                    elif cart_intent == "delete":
+                        answer = delete_cart_item(query)
+                    elif cart_intent == "add":
+                        product_id = api.payload["product_id"]
+                        if plus_cart_item(product_id):
+                            answer = "장바구니에 담았습니다."
+                        else:
+                            answer = "이미 담긴 상품입니다."
+                elif intent == "unclassified":
+                    answer = "죄송합니다. 다시 말씀해주세요"
 
                 # Create the response
                 response = {
                     "query": query,
                     "intent": intent,
                     "answer": answer,
-                    "product_id": str(product_info["id"]) if intent == "추천" else None,
+                    "product_id": str(product_info["id"]) if intent == "recommendation" else None,
                 }
 
                 return jsonify(response)
