@@ -1,7 +1,7 @@
 import re
 from recommend.recommend import get_product_info_by_id
 
-cart = []
+cart = ["0","25","13"]
 #장바구니 담기
 def plus_cart_item(product_id):
     if product_id in cart:
@@ -20,8 +20,7 @@ def get_all_cart_items():
             product_info = get_product_info_by_id(item)
             items = items + f"{i}번 : {product_info['title']}\n"
 
-        answer = items + "\n만약 장바구니에 있는 상품을 삭제하고 싶으시다면 '장바구니 몇번 삭제'라고 말씀해주세요"
-        return answer
+        return items
 
 #장바구니 삭제
 def delete_cart_item(query):
@@ -37,6 +36,16 @@ def delete_cart_item(query):
 
 def korean_to_number(text):
     korean_number_map = {
+        '이십': '20',
+        '십일': '11',
+        '십이': '12',
+        '십삽': '13',
+        '십사': '14',
+        '십오': '15',
+        '십육': '16',
+        '십칠': '17',
+        '십팔': '18',
+        '십구': '19',
         '일': '1',
         '이': '2',
         '삼': '3',
@@ -47,20 +56,10 @@ def korean_to_number(text):
         '팔': '8',
         '구': '9',
         '십': '10',
-        '십일': '11',
-        '십이': '12',
-        '십삽': '13',
-        '십사': '14',
-        '십오': '15',
-        '십육': '16',
-        '십칠': '17',
-        '십팔': '18',
-        '십구': '19',
-        '이십': '20'
     }
 
     for korean, number in korean_number_map.items():
-        text = re.sub(korean + '번', number + '번', text)
+        text = re.sub(korean , number , text)
 
     print(text)
     return text

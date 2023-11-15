@@ -16,6 +16,10 @@ from cart.cart import (
     get_all_cart_items,
     delete_cart_item,
 )
+from payment.payment import(
+    payment_logic,
+    is_payment
+)
 from flask_cors import CORS
 import json
 
@@ -66,74 +70,84 @@ def create_app():
             try:
                 # Get the query from the request
                 query = api.payload["query"]
-                # 사용자 의도 파악
-                intent = get_user_intent(query)
-                answer = ""
 
-                top_k = 1  # Top k recommendations
+                if is_payment == False:
+                    # 사용자 의도 파악
+                    intent = get_user_intent(query)
+                    print(intent)
+                    answer = ""
 
-                if intent == "payment":
-                    try:
-                        answer = "장동호님 결제가 완료되었습니다."
-                    except Exception as ex:
-                        print(f"Error: {ex}")
-                        answer = "장동호님 결제에 실패하였습니다."
+                    top_k = 1  # Top k recommendations
+                    if intent == "payment":
+                        is_payment == True
+                        answer ="결제 로직이 진행될 예정입니다. 결제를 그만두고 싶다면 '결제 취소'라고 말씀해주세요."
+                        payment_logic(query)
+                    elif intent == "recommendation":
+                        product_info = get_query_sim_top_k(query, top_k)[0]
+                        answer = get_recommendation_answer(product_info)
 
-                elif intent == "recommendation":
-                    product_info = get_query_sim_top_k(query, top_k)[0]
-                    answer = get_recommendation_answer(product_info)
-
-                elif intent == "description":
-                    product_id = api.payload["product_id"]
-                    if product_id:
-                        product_info = get_product_info_by_id(product_id)
-                        if product_info:
-                            answer = get_description_answer(product_info, query)
-                        else:
-                            answer = "해당 상품은 없습니다."
-                    else:
-                        answer = "어떤 상품을 원하세요?"
-
-                elif intent == "review":
-                    product_id = api.payload["product_id"]
-                    if product_id:
-                        product_info = get_product_reviews_by_id(product_id)
-                        if product_info:
-                            # 3000자 이상 리뷰는 3000자로 자르기
-                            product_info["review"] = (
-                                product_info["review"][:3000] + "..."
-                                if len(product_info["review"]) > 3000
-                                else product_info["review"]
-                            )
-                            print(product_info["review"])
-                            answer = get_description_answer(product_info, query)
-                        else:
-                            answer = "해당 상품은 없습니다."
-                    else:
-                        answer = "어떤 상품을 원하세요?"
-
-                elif intent == "cart":
-                    cart_intent = get_cart_intent(query)
-                    if cart_intent == "show":
-                        answer = get_all_cart_items()
-                    elif cart_intent == "delete":
-                        answer = delete_cart_item(query)
-                    elif cart_intent == "add":
+                    elif intent == "description":
                         product_id = api.payload["product_id"]
-                        if plus_cart_item(product_id):
-                            answer = "장바구니에 담았습니다."
+                        if product_id:
+                            product_info = get_product_info_by_id(product_id)
+                            if product_info:
+                                answer = get_description_answer(product_info, query)
+                            else:
+                                answer = "해당 상품은 없습니다."
                         else:
-                            answer = "이미 담긴 상품입니다."
-                elif intent == "unclassified":
-                    answer = "죄송합니다. 다시 말씀해주세요"
+                            answer = "어떤 상품을 원하세요?"
 
-                # Create the response
-                response = {
-                    "query": query,
-                    "intent": intent,
-                    "answer": answer,
-                    "product_id": str(product_info["id"]) if intent == "recommendation" else None,
-                }
+                    elif intent == "review":
+                        product_id = api.payload["product_id"]
+                        if product_id:
+                            product_info = get_product_reviews_by_id(product_id)
+                            if product_info:
+                                # 3000자 이상 리뷰는 3000자로 자르기
+                                product_info["review"] = (
+                                    product_info["review"][:3000] + "..."
+                                    if len(product_info["review"]) > 3000
+                                    else product_info["review"]
+                                )
+                                print(product_info["review"])
+                                answer = get_description_answer(product_info, query)
+                            else:
+                                answer = "해당 상품은 없습니다."
+                        else:
+                            answer = "어떤 상품을 원하세요?"
+
+                    elif intent == "cart":
+                        cart_intent = get_cart_intent(query)
+                        if cart_intent == "show":
+                            answer = get_all_cart_items() + "\n만약 장바구니에 있는 상품을 삭제하고 싶으시다면 '장바구니 몇번 삭제'라고 말씀해주세요"
+                        elif cart_intent == "delete":
+                            answer = delete_cart_item(query)
+                        elif cart_intent == "add":
+                            product_id = api.payload["product_id"]
+                            if plus_cart_item(product_id):
+                                answer = "장바구니에 담았습니다."
+                            else:
+                                answer = "이미 담긴 상품입니다."
+                    elif intent == "unclassified":
+                        answer = "죄송합니다. 다시 말씀해주세요"
+
+                    # Create the response
+                    response = {
+                        "query": query,
+                        "intent": intent,
+                        "answer": answer,
+                        "product_id": str(product_info["id"]) if intent == "recommendation" else None,
+                    }
+                    print(response)
+
+                else:
+                    answer = payment_logic(query)
+
+                    response = {
+                        "query": query,
+                        "intent": "payment",
+                        "answer": answer,
+                        "product_id": None,
+                    }
 
                 return jsonify(response)
 
