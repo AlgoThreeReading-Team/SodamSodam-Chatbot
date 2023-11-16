@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, abort
 from flask_restx import Api, Resource, fields
+
 from recommend.recommend import (
     get_query_sim_top_k,
     get_product_info_by_id,
@@ -16,13 +17,10 @@ from cart.cart import (
     get_all_cart_items,
     delete_cart_item,
 )
-from payment.payment import(
-    payment_logic,
-    is_payment
-)
+import payment.payment
+from payment.payment import payment_logic
 from flask_cors import CORS
 import json
-
 
 def create_app():
     app = Flask(__name__)
@@ -71,7 +69,7 @@ def create_app():
                 # Get the query from the request
                 query = api.payload["query"]
 
-                if is_payment == False:
+                if payment.payment.is_payment == False:
                     # 사용자 의도 파악
                     intent = get_user_intent(query)
                     print(intent)
@@ -79,9 +77,8 @@ def create_app():
 
                     top_k = 1  # Top k recommendations
                     if intent == "payment":
-                        is_payment == True
-                        answer ="결제 로직이 진행될 예정입니다. 결제를 그만두고 싶다면 '결제 취소'라고 말씀해주세요."
-                        payment_logic(query)
+                        answer = payment_logic(query)
+                        payment.payment.is_payment = True
                     elif intent == "recommendation":
                         product_info = get_query_sim_top_k(query, top_k)[0]
                         answer = get_recommendation_answer(product_info)
@@ -118,7 +115,7 @@ def create_app():
                     elif intent == "cart":
                         cart_intent = get_cart_intent(query)
                         if cart_intent == "show":
-                            answer = get_all_cart_items() + "\n만약 장바구니에 있는 상품을 삭제하고 싶으시다면 '장바구니 몇번 삭제'라고 말씀해주세요"
+                            answer = get_all_cart_items() + "\n만약 장바구니에 있는 상품을 삭제하고 싶다면 '장바구니 몇번 삭제'라고 말씀해주세요, 결제하고 싶다면 '결제 할래'라고 말씀해주세요."
                         elif cart_intent == "delete":
                             answer = delete_cart_item(query)
                         elif cart_intent == "add":

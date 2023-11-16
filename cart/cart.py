@@ -1,7 +1,7 @@
 import re
 from recommend.recommend import get_product_info_by_id
 
-cart = ["0","25","13"]
+cart = ["0","25","13","9"]
 #장바구니 담기
 def plus_cart_item(product_id):
     if product_id in cart:
@@ -24,8 +24,7 @@ def get_all_cart_items():
 
 #장바구니 삭제
 def delete_cart_item(query):
-    change_number = korean_to_number(query)
-    numbers = [int(char) for char in change_number if char.isdigit()]
+    numbers = korean_to_number(query)
     numbers_sorted = sorted(numbers, reverse=True)
     print(numbers_sorted)
     for number in numbers_sorted:
@@ -61,5 +60,5 @@ def korean_to_number(text):
     for korean, number in korean_number_map.items():
         text = re.sub(korean , number , text)
 
-    print(text)
-    return text
+    numbers = [int(char) for char in text if char.isdigit()]
+    return numbers
