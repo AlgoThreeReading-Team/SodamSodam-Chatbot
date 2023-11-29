@@ -22,6 +22,7 @@ from payment.payment import payment_logic
 from flask_cors import CORS
 import json
 
+
 def create_app():
     app = Flask(__name__)
     # cors 허용
@@ -75,7 +76,7 @@ def create_app():
                     print(intent)
                     answer = ""
 
-                    top_k = 1  # Top k recommendations
+                    top_k = 3  # Top k recommendations
                     if intent == "payment":
                         answer = payment_logic(query)
                         payment.payment.is_payment = True
@@ -94,6 +95,21 @@ def create_app():
                         else:
                             answer = "어떤 상품을 원하세요?"
 
+                    elif intent == "additional searches":
+                        product_id = api.payload["product_id"]
+                        print(product_id)
+                        if product_id:
+                            product_info = get_product_info_by_id(product_id)
+                            if product_info:
+                                product_info = get_query_sim_top_k(
+                                    product_info["title"], top_k
+                                )[1]
+                                answer = get_recommendation_answer(product_info)
+                            else:
+                                answer = "해당 상품은 없습니다."
+                        else:
+                            answer = "어떤 상품을 원하세요?"
+                        print(product_info)
                     elif intent == "review":
                         product_id = api.payload["product_id"]
                         if product_id:
@@ -115,7 +131,10 @@ def create_app():
                     elif intent == "cart":
                         cart_intent = get_cart_intent(query)
                         if cart_intent == "show":
-                            answer = get_all_cart_items() + "\n만약 장바구니에 있는 상품을 삭제하고 싶다면 '장바구니 몇번 삭제'라고 말씀해주세요, 결제하고 싶다면 '결제 할래'라고 말씀해주세요."
+                            answer = (
+                                get_all_cart_items()
+                                + "\n만약 장바구니에 있는 상품을 삭제하고 싶다면 '장바구니 몇번 삭제'라고 말씀해주세요, 결제하고 싶다면 '결제 할래'라고 말씀해주세요."
+                            )
                         elif cart_intent == "delete":
                             answer = delete_cart_item(query)
                         elif cart_intent == "add":
@@ -132,7 +151,9 @@ def create_app():
                         "query": query,
                         "intent": intent,
                         "answer": answer,
-                        "product_id": str(product_info["id"]) if intent == "recommendation" else None,
+                        "product_id": str(product_info["id"])
+                        if intent == "recommendation" or intent == "additional searches"
+                        else None,
                     }
                     print(response)
 

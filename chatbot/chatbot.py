@@ -6,9 +6,18 @@ from dotenv import load_dotenv
 load_dotenv()
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+
 # 사용자의 의도를 파악하는 모델
 def get_user_intent(query):
-    allowed_intents = ["description", "recommendation", "review", "cart", "payment", "unclassified"]
+    allowed_intents = [
+        "description",
+        "recommendation",
+        "additional searches",
+        "review",
+        "cart",
+        "payment",
+        "unclassified",
+    ]
     messages = [
         {
             "role": "system",
@@ -20,11 +29,11 @@ def get_user_intent(query):
         },
     ]
 
-    response = client.chat.completions.create(model="gpt-3.5-turbo",
-    messages=messages)
+    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages)
     chatbot_response = response.choices[0].message.content
 
-    return chatbot_response if chatbot_response in allowed_intents else "미분류"
+    return chatbot_response if chatbot_response in allowed_intents else "unclassified"
+
 
 def get_cart_intent(query):
     allowed_intents = ["show", "delete", "add"]
@@ -39,11 +48,11 @@ def get_cart_intent(query):
         },
     ]
 
-    response = client.chat.completions.create(model="gpt-3.5-turbo",
-                                              messages=messages)
+    response = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages)
     chatbot_response = response.choices[0].message.content
 
     return chatbot_response if chatbot_response in allowed_intents else "장바구니 의도 파악 오류"
+
 
 # TODO: 상품 추천 멘트
 def get_recommendation_answer(product_info):
@@ -63,9 +72,9 @@ def get_description_answer(product_info, query):
         },
     ]
 
-    response = client.chat.completions.create(model="gpt-3.5-turbo",
-    messages=messages,
-    temperature=0.5)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo", messages=messages, temperature=0.5
+    )
     chatbot_response = response.choices[0].message.content
 
     return chatbot_response
