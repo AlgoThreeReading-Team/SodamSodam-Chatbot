@@ -51,7 +51,8 @@ def get_query_sim_top_k(query, top_k):
     result_list = []
 
     for index in top_indices:
-        if cos_scores[index] >= 0.5:
+        print(df.iloc[index]["product_url"], cos_scores[index])
+        if cos_scores[index] >= 0.3:
             product_info = {
                 "id": df.iloc[index]["index"],
                 "title": df.iloc[index]["title"],

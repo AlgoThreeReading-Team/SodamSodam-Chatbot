@@ -152,7 +152,7 @@ def create_app():
                             else:
                                 answer = "이미 담긴 상품입니다."
                     elif intent == "unclassified":
-                        answer = "죄송합니다. 다시 말씀해주세요"
+                        answer = "죄송합니다. 이해하지 못했습니다. 다시 말씀해주세요."
 
                     # Create the response
                     response = {
