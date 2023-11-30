@@ -81,8 +81,13 @@ def create_app():
                         answer = payment_logic(query)
                         payment.payment.is_payment = True
                     elif intent == "recommendation":
-                        product_info = get_query_sim_top_k(query, top_k)[0]
-                        answer = get_recommendation_answer(product_info)
+                        # 상품이 있으면 product_info에 상품을 담고, 없으면 None을 담음
+                        product_info = get_query_sim_top_k(query, top_k)
+                        if len(product_info) == 0:
+                            answer = "해당 상품은 없습니다."
+                        else:
+                            product_info = product_info[0]
+                            answer = get_recommendation_answer(product_info)
 
                     elif intent == "description":
                         product_id = api.payload["product_id"]
@@ -97,19 +102,22 @@ def create_app():
 
                     elif intent == "additional searches":
                         product_id = api.payload["product_id"]
-                        print(product_id)
                         if product_id:
                             product_info = get_product_info_by_id(product_id)
                             if product_info:
                                 product_info = get_query_sim_top_k(
                                     product_info["title"], top_k
-                                )[1]
-                                answer = get_recommendation_answer(product_info)
+                                )
+                                if len(product_info) == 0:
+                                    answer = "해당 상품은 없습니다."
+                                else:
+                                    product_info = product_info[1]
+                                    answer = get_recommendation_answer(product_info)
                             else:
                                 answer = "해당 상품은 없습니다."
                         else:
+                            product_info = None
                             answer = "어떤 상품을 원하세요?"
-                        print(product_info)
                     elif intent == "review":
                         product_id = api.payload["product_id"]
                         if product_id:
@@ -152,7 +160,11 @@ def create_app():
                         "intent": intent,
                         "answer": answer,
                         "product_id": str(product_info["id"])
-                        if intent == "recommendation" or intent == "additional searches"
+                        if (
+                            intent == "recommendation"
+                            or intent == "additional searches"
+                        )
+                        and product_info
                         else None,
                     }
                     print(response)

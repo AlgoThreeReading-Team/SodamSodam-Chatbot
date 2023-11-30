@@ -51,21 +51,22 @@ def get_query_sim_top_k(query, top_k):
     result_list = []
 
     for index in top_indices:
-        product_info = {
-            "id": df.iloc[index]["index"],
-            "title": df.iloc[index]["title"],
-            "product_url": df.iloc[index]["product_url"],
-            "avg_star": df.iloc[index]["avg_star"],
-            "count_star": df.iloc[index]["count_star"],
-            "total_price": df.iloc[index]["total_price"],
-            "shipping_fee": df.iloc[index]["shipping_fee"]
-            + df.iloc[index]["shipping_fee_detail"],
-            "original_price": df.iloc[index]["original_price"],
-            "delivery_day": df.iloc[index]["delivery_day"],
-            "essential_info": df.iloc[index]["essential_info"],
-            "image_text": df.iloc[index]["image_text"],
-            "text": df.iloc[index]["text"],
-        }
-        result_list.append(product_info)
+        if cos_scores[index] >= 0.5:
+            product_info = {
+                "id": df.iloc[index]["index"],
+                "title": df.iloc[index]["title"],
+                "product_url": df.iloc[index]["product_url"],
+                "avg_star": df.iloc[index]["avg_star"],
+                "count_star": df.iloc[index]["count_star"],
+                "total_price": df.iloc[index]["total_price"],
+                "shipping_fee": df.iloc[index]["shipping_fee"]
+                + df.iloc[index]["shipping_fee_detail"],
+                "original_price": df.iloc[index]["original_price"],
+                "delivery_day": df.iloc[index]["delivery_day"],
+                "essential_info": df.iloc[index]["essential_info"],
+                "image_text": df.iloc[index]["image_text"],
+                "text": df.iloc[index]["text"],
+            }
+            result_list.append(product_info)
 
     return result_list
